@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /hallinta/
+
+Sitemap: https://joppari.fi/sitemap.xml

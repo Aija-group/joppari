@@ -1,0 +1,61 @@
+# Äijä Group – staattinen sivusto Apache-webhotellissa (Plesk/cPanel)
+# Kopioi nimellä .htaccess site/-kansion juureen.
+
+# --- HTTPS + www-normalisointi ---------------------------------------
+# Käytä TÄTÄ tai paneelin omaa 301-ohjausta – älä molempia.
+RewriteEngine On
+RewriteCond %{HTTPS} !=on
+RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+
+# www -> ilman www:tä (vaihda toisin päin jos asiakas haluaa www:n)
+RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
+
+# --- Siistit URLit ----------------------------------------------------
+DirectoryIndex index.html index.php
+# /palvelut/x -> /palvelut/x/  (jotta suhteelliset polut toimivat)
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteCond %{REQUEST_URI} !/$
+RewriteRule ^(.*)$ /$1/ [R=301,L]
+
+# --- Virhesivut -------------------------------------------------------
+ErrorDocument 404 /404.html
+
+# --- Vanhan sivuston ohjaukset (täytä asiakaskohtaisesti) -------------
+# Redirect 301 /vanha-sivu.html /palvelut/uusi/
+# Redirect 301 /index.php?page=yhteys /yhteystiedot/
+
+# --- Välimuisti -------------------------------------------------------
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/html                 "access plus 0 seconds"
+  ExpiresByType text/css                  "access plus 1 year"
+  ExpiresByType application/javascript    "access plus 1 year"
+  ExpiresByType image/webp                "access plus 1 year"
+  ExpiresByType image/jpeg                "access plus 1 year"
+  ExpiresByType image/png                 "access plus 1 year"
+  ExpiresByType image/svg+xml             "access plus 1 year"
+  ExpiresByType font/woff2                "access plus 1 year"
+</IfModule>
+
+# --- Pakkaus ----------------------------------------------------------
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml \
+    application/javascript application/json image/svg+xml
+</IfModule>
+
+# --- Suojaus ----------------------------------------------------------
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set X-Frame-Options "SAMEORIGIN"
+</IfModule>
+
+# Vanhan sivuston siirtokansio ei näy selaimeen eikä Googleen
+RedirectMatch 404 ^/_vanha(/.*)?$
+
+# Lomakeloki ja piilotiedostot eivät näy selaimeen
+<FilesMatch "^\.">
+  Require all denied
+</FilesMatch>
+Options -Indexes

@@ -1,0 +1,17 @@
+{
+  "name": "joppari",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Kahvila-Ravintola St1 Joppari – verkkosivusto (staattinen sivu + Node-palvelin NordicHostin AI App Hostingiin)",
+  "main": "server.js",
+  "scripts": {
+    "build": "node -e \"console.log('site/ on valmiiksi rakennettu (python3 build.py omalla koneella) – ei build-vaihetta palvelimella')\"",
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "nodemailer": "^7.0.6"
+  }
+}
