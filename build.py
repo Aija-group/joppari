@@ -191,7 +191,8 @@ def hours_list(cls="hours"):
 
 
 def footer():
-    demo = '<p class="demo-note">Sivustoehdotus: Äijä Group. Tämä on esikatseluversio.</p>' if DEMO else ""
+    demo = ('<p class="demo-note">Sivustoehdotus: Äijä Group. Tämä on esikatseluversio. '
+            '<a href="/hallinta/">Kokeile lounaslistan hallintaa →</a></p>') if DEMO else ""
     return f'''<footer class="ftr">
   <div class="wrap">
     <div class="ftr-logos"><img src="/img/st1-logo.png" alt="St1" width="263" height="120" loading="lazy">
