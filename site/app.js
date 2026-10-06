@@ -63,7 +63,7 @@
   }
   function lsGet() { try { var v = localStorage.getItem(LS_KEY); return v ? JSON.parse(v) : null; } catch (e) { return null; } }
   function lsSet(d) { try { localStorage.setItem(LS_KEY, JSON.stringify(d)); return true; } catch (e) { return false; } }
-  /* Esikatselun esimerkkiviikko siirretään aina kuluvalle viikolle */
+  /* Mallilistan päivät siirretään aina kuluvalle viikolle (vain demo-build) */
   function shiftSample(d) {
     if (!d || !d.days) return d;
     var keys = Object.keys(d.days).sort(), mon = monday(NOW.iso), days = {};

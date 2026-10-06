@@ -45,6 +45,10 @@ YEAR = 2026
 TODAY = "2026-10-04"
 NAME = COMPANY["name"]          # "St1 Joppari" – nimeä ei erotella St1:stä
 STATION = COMPANY["station"]    # virallinen aseman nimi "St1 Pello"
+# Demo- ja esikatselutekstit vain demo-buildiin (Netlify/artifakti); tuotannon HTML:ssä niitä ei ole lainkaan
+DEMO_NOTE = '<p class="lc-demo" data-lunch-demo hidden>Esimerkkilista. Päivi päivittää oikean listan hallintasivulta.</p>' if DEMO else ""
+PREVIEW_NOTE = ('<p class="note" data-preview-note hidden>Esikatselu: mikä tahansa salasana käy, ja muutokset tallentuvat vain tähän selaimeen.</p>'
+                if DEMO else "")
 
 
 def esc(text):
@@ -347,7 +351,7 @@ def lunch_card(cls="lunch-card", title_tag="h2"):
   <p class="lc-sub">Kotiruoka- ja salaattibuffet <b>{BUFFET_HOURS}</b></p>
   <ul class="lc-list" data-lunch-list><li class="lc-empty">Päivän lounaslista päivitetään tähän. Kysy päivän ruoat puhelimitse: <a href="{TEL}">{COMPANY["phone"]}</a></li></ul>
   <div class="lc-foot"><span class="lc-price" data-lunch-price></span><a class="link" href="/lounas/">Koko viikon lista{icon("arrow")}</a></div>
-  <p class="lc-demo" data-lunch-demo hidden>Esimerkkilista. Päivi päivittää oikean listan hallintasivulta.</p>
+  {DEMO_NOTE}
 </div>'''
 
 
@@ -629,7 +633,7 @@ def build_lounas():
       <p class="lc-empty">Viikon lounaslista päivitetään tähän. Buffet on tarjolla joka päivä {BUFFET_HOURS}. Kysy päivän ruoat: <a href="{TEL}">{COMPANY["phone"]}</a></p>
     </div>
     <p class="lc-note" data-lunch-note hidden></p>
-    <p class="lc-demo" data-lunch-demo hidden>Esimerkkilista. Päivi päivittää oikean listan hallintasivulta.</p>
+    {DEMO_NOTE}
   </div>
   <aside class="week-side">
     <div class="side-card buffet-card rv">{img("ai-salaatti", "Salaattipöytä", "(max-width:900px) 100vw, 380px")}{AI_NOTE}
@@ -755,7 +759,7 @@ def build_admin():
       <p class="err" data-login-err>Väärä salasana. Yritä uudelleen.</p>
       <button class="btn btn-primary" type="submit">Kirjaudu{icon("arrow")}</button>
     </form>
-    <p class="note" data-preview-note hidden>Esikatselu: mikä tahansa salasana käy, ja muutokset tallentuvat vain tähän selaimeen.</p>
+    {PREVIEW_NOTE}
   </div>
 
   <div class="admin-app" data-admin-app hidden>
