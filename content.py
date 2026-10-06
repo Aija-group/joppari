@@ -131,4 +131,7 @@ REDIRECTS = {
     "/la-carte/": "/lounas/",
     "/in-english/": "/#english",
     "/etusivu/": "/",
+    "/hampurilaiset-suolaiset/": "/lounas/",
+    "/fb/": "/",
+    "/po-russki/": "/",
 }

@@ -3,5 +3,8 @@
  "/lounaslista/": "/lounas/",
  "/la-carte/": "/lounas/",
  "/in-english/": "/#english",
- "/etusivu/": "/"
+ "/etusivu/": "/",
+ "/hampurilaiset-suolaiset/": "/lounas/",
+ "/fb/": "/",
+ "/po-russki/": "/"
 }
