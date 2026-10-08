@@ -33,13 +33,16 @@
     var h; try { h = JSON.parse(el.dataset.open); } catch (e) { return; }
     var t = h[NOW.d], txt = $('span', el);
     if (t && NOW.m >= t[0] && NOW.m < t[1]) {
-      el.classList.add('is-open'); txt.textContent = 'Auki nyt, suljemme klo ' + hm(t[1]);
+      el.classList.add('is-open');
+      txt.innerHTML = el.dataset.short ? 'Auki nyt, <span class="nw">klo ' + hm(t[1]) + ' asti</span>' : 'Auki nyt, suljemme <span class="nw">klo ' + hm(t[1]) + '</span>';
     } else {
       el.classList.add('is-closed');
       var nd = NOW.d, nt = t && NOW.m < t[0] ? t : null;
       if (!nt) { nd = (NOW.d + 1) % 7; nt = h[nd]; }
       var dn = ['su', 'ma', 'ti', 'ke', 'to', 'pe', 'la'];
-      txt.textContent = 'Suljettu, avaamme ' + (nd === NOW.d ? 'tänään' : nd === (NOW.d + 1) % 7 ? 'huomenna' : dn[nd]) + ' klo ' + hm(nt[0]);
+      var when = nd === NOW.d ? 'tänään' : nd === (NOW.d + 1) % 7 ? 'huomenna' : dn[nd];
+      txt.innerHTML = el.dataset.short ? 'Avataan ' + when + ' <span class="nw">klo ' + hm(nt[0]) + '</span>'
+        : 'Suljettu, avaamme ' + when + ' <span class="nw">klo ' + hm(nt[0]) + '</span>';
     }
   });
 
@@ -102,9 +105,11 @@
     var demo = $('[data-lunch-demo]', box); if (demo) demo.hidden = !data.sample;
     $$('button', tabBox).forEach(function (b) {
       b.addEventListener('click', function () {
+        /* Koko viikko pysyy näkyvissä: painike siirtää korostuksen valittuun päivään ja vierittää siihen */
         $$('button', tabBox).forEach(function (x) { x.classList.toggle('on', x === b); });
-        wrap.classList.add('one');
-        $$('.wday', wrap).forEach(function (w) { w.classList.toggle('show', w.dataset.wday === b.dataset.day); });
+        var target;
+        $$('.wday', wrap).forEach(function (w) { var on = w.dataset.wday === b.dataset.day; w.classList.toggle('is-today', on); if (on) target = w; });
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
       });
     });
   }

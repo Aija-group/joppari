@@ -169,9 +169,10 @@ def btn_call(label=None, cls="btn btn-cream"):
     return f'<a class="{cls}" href="{TEL}">{icon("phone")}<span>{label or COMPANY["phone"]}</span></a>'
 
 
-def open_badge(cls="open"):
-    """Auki nyt / suljettu – JS päivittää; ilman JS:ää näkyy aukiolo."""
-    return f'<span class="{cls}" data-open=\'{json.dumps(HOURS_JS)}\'><i></i><span>Ma–pe 7–20 · la–su 9–20</span></span>'
+def open_badge(cls="open", short=False):
+    """Auki nyt / suljettu, JS päivittää; ilman JS:ää näkyy aukiolo. short = lyhyt teksti kapeisiin paikkoihin (tietonauha)."""
+    sh = ' data-short="1"' if short else ""
+    return f'<span class="{cls}"{sh} data-open=\'{json.dumps(HOURS_JS)}\'><i></i><span>Ma–pe 7–20 · la–su 9–20</span></span>'
 
 
 def header(current):
@@ -450,10 +451,10 @@ def build_home():
 </div></section>
 
 <section class="strip"><div class="wrap"><div class="strip-in">
-  <div>{icon("clock")}{open_badge("open on-dark")}</div>
-  <div>{icon("plate")}<span>Lounasbuffet joka päivä <b>{BUFFET_HOURS}</b></span></div>
-  <div>{icon("phone")}<a href="{TEL}"><b>{COMPANY["phone"]}</b></a></div>
-  <div>{icon("pin")}<a href="{MAPS}" target="_blank" rel="noopener">{COMPANY["street"]}, {COMPANY["city"]}</a></div>
+  <div>{icon("clock")}<div class="st"><small>Aukioloajat</small>{open_badge("open on-dark", short=True)}</div></div>
+  <div>{icon("plate")}<div class="st"><small>Lounasbuffet</small><span>Joka päivä <span class="nw">{BUFFET_HOURS}</span></span></div></div>
+  <div>{icon("phone")}<div class="st"><small>Puhelin</small><a href="{TEL}" class="nw">{COMPANY["phone"]}</a></div></div>
+  <div>{icon("pin")}<div class="st"><small>Osoite</small><a href="{MAPS}" target="_blank" rel="noopener">{COMPANY["street"]}, {COMPANY["city"]}</a></div></div>
 </div></div></section>
 
 <section class="sec"><div class="wrap">
