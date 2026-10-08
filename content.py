@@ -17,8 +17,6 @@ COMPANY = {
     "region": "Lappi",
     "phone": "016 512 771",
     "phone_intl": "+35816512771",
-    "phone2": "040 706 5450",
-    "phone2_intl": "+358407065450",
     "email": "paivi@joppari.fi",
     "facebook": "https://www.facebook.com/joppari.fi/",
     "travelpello": "https://travelpello.fi/fi/",

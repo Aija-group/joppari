@@ -212,7 +212,6 @@ def footer():
       <div><h3>Yhteystiedot</h3><ul>
         <li><a href="{MAPS}" target="_blank" rel="noopener">{STATION}<br>{COMPANY["street"]}, {COMPANY["zip"]} {COMPANY["city"]}</a></li>
         <li><a href="{TEL}">{COMPANY["phone"]}</a></li>
-        <li><a href="tel:{COMPANY["phone2_intl"]}">{COMPANY["phone2"]}</a></li>
         <li><a href="mailto:{COMPANY["email"]}">{COMPANY["email"]}</a></li>
       </ul></div>
     </div>
@@ -359,13 +358,14 @@ def visit_block():
     return f'''<section class="sec visit" id="kaynti"><div class="wrap visit-grid">
   <div class="visit-info rv">
     <span class="kicker">Tule käymään</span><h2>{STATION}, Pellontie 31</h2>
-    <p class="muted">Kahvila-ravintola, pizzeria ja majoitus samalla pihalla asemalla, joten pysähtyminen matkan varrella on helppoa.</p>
+    <p class="visit-lead">Polttoaineet, kahvila-ravintola, pizzeria, grilli ja majoitus. Kaikki samalla asemalla.</p>
+    <p class="muted">Helppo pysähtyä matkasi varrella.</p>
     <div class="visit-cards">
       <div class="vcard">{icon("clock")}<div><small>Aukioloajat</small>{hours_list()}{open_badge()}</div></div>
       <div class="vcard">{icon("plate")}<div><small>Lounasbuffet</small><p><b>Joka päivä {BUFFET_HOURS}</b><br>Kotiruoka ja salaattipöytä</p></div></div>
       <div class="vcard">{icon("pin")}<div><small>Osoite</small><p><b>{COMPANY["street"]}</b><br>{COMPANY["zip"]} {COMPANY["city"]}</p>
         <a class="link" href="{MAPS}" target="_blank" rel="noopener">Reittiohjeet{icon("arrow")}</a></div></div>
-      <div class="vcard">{icon("phone")}<div><small>Puhelin</small><p><a href="{TEL}"><b>{COMPANY["phone"]}</b></a><br><a href="tel:{COMPANY["phone2_intl"]}">{COMPANY["phone2"]}</a></p></div></div>
+      <div class="vcard">{icon("phone")}<div><small>Puhelin</small><p><a href="{TEL}"><b>{COMPANY["phone"]}</b></a></p></div></div>
     </div>
   </div>
   <div class="map rv"><iframe title="St1 Joppari kartalla" src="{MAP_EMBED}" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
@@ -707,7 +707,7 @@ def build_majoitus():
     <span class="kicker">Majoitustiedustelu</span>
     <h2>Kysy vapaita huoneita</h2>
     <p class="muted">Lähetä päivämäärät ja henkilömäärä, niin kerromme majoitustilanteen. Nopeimmin tavoitat meidät puhelimitse.</p>
-    <div class="call-card">{icon("phone")}<div><small>Soita</small><a href="{TEL}">{COMPANY["phone"]}</a><a href="tel:{COMPANY["phone2_intl"]}">{COMPANY["phone2"]}</a></div></div>
+    <div class="call-card">{icon("phone")}<div><small>Soita</small><a href="{TEL}">{COMPANY["phone"]}</a></div></div>
     <div class="call-card">{icon("clock")}<div><small>Ravintola auki</small>{hours_list()}</div></div>
   </div>
   {contact_form("Majoitustiedustelu", "Täytä tiedot, niin vastaamme sähköpostilla tai puhelimitse.", room=True)}
@@ -731,7 +731,7 @@ def build_contact():
     <span class="kicker">Yhteystiedot</span>
     <h1 class="h1-sm">{NAME}</h1>
     <p class="muted">{STATION}, {COMPANY["street"]}. Ryhmävaraukset, pizzatilaukset noutoon ja majoitus hoituvat nopeimmin puhelimitse.</p>
-    <div class="call-card">{icon("phone")}<div><small>Puhelin</small><a href="{TEL}">{COMPANY["phone"]}</a><a href="tel:{COMPANY["phone2_intl"]}">{COMPANY["phone2"]}</a></div></div>
+    <div class="call-card">{icon("phone")}<div><small>Puhelin</small><a href="{TEL}">{COMPANY["phone"]}</a></div></div>
     <div class="call-card">{icon("mail")}<div><small>Sähköposti</small><a href="mailto:{COMPANY["email"]}">{COMPANY["email"]}</a></div></div>
     <div class="call-card">{icon("pin")}<div><small>Osoite</small><a href="{MAPS}" target="_blank" rel="noopener">{STATION}<br>{COMPANY["street"]}, {COMPANY["zip"]} {COMPANY["city"]}</a></div></div>
     <div class="call-card">{icon("clock")}<div><small>Aukioloajat</small>{hours_list()}{open_badge()}<p class="note">Lounasbuffet joka päivä {BUFFET_HOURS}</p></div></div>

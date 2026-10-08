@@ -231,6 +231,7 @@ code { font-size: .9em; background: var(--cream-2); padding: 2px 6px; border-rad
 /* Käyntitiedot */
 .visit { background: var(--cream-3); }
 .visit-grid { display: grid; grid-template-columns: 1fr 1.05fr; gap: 56px; align-items: stretch; }
+.visit-lead { font-size: 1.14rem; font-weight: 700; color: var(--green-d); margin: 0 0 4px; }
 .visit-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 24px; }
 .vcard { display: flex; gap: 14px; background: #fff; border-radius: var(--r-sm); padding: 20px; border: 1px solid var(--cream-line); }
 .vcard > .ic { width: 22px; height: 22px; color: var(--green); margin-top: 2px; }

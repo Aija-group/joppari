@@ -7,7 +7,7 @@ Tyylit `src/style.css`, toiminnot `src/app.js`, kuvat `src/kuvat/`, logot `src/s
     HOSTING=netlify python3 build.py                        # Netlify-demo + ../joppari-netlify.zip
     HOSTING=netlify python3 build.py --preview --artifact   # esikatselu Claude-artifaktina (preview/)
 
-Yritys: **St1 Joppari** – aseman virallinen nimi **St1 Pello**. Pellontie 31, 95700 Pello. 016 512 771 / 040 706 5450, paivi@joppari.fi.
+Yritys: **St1 Joppari** – aseman virallinen nimi **St1 Pello**. Pellontie 31, 95700 Pello. 016 512 771, paivi@joppari.fi.
 Nimeä ei saa erottaa: aina "St1 Joppari", ei pelkkä "Joppari" tai "Kahvila-Ravintola Joppari" (asiakkaan linjaus 29.9.2026).
 
 Esikatselu: https://claude.ai/artifact/6Ua4VCmkdXvDkmfcaSWNsi
