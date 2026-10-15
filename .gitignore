@@ -1,5 +1,4 @@
 *.zip
-_materiaali/
 preview/
 __pycache__/
 node_modules/
