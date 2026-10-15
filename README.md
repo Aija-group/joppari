@@ -40,7 +40,9 @@ Esikatselu: https://claude.ai/artifact/6Ua4VCmkdXvDkmfcaSWNsi
   - **buffetin hinnan** ja **lisätiedon** (näkyvät listan alla)
   - **tiedotteen koko sivuston yläreunaan** (esim. poikkeavat aukioloajat), tyhjä = ei tiedotetta
 - "Tallenna ja julkaise" päivittää heti etusivun "Päivän lounas" -kortin, /lounas/-sivun viikkolistan ja tiedotteen.
-- Tekniikka: `POST /api/lounas` → `DATA_DIR/lounas.json`; sivut lukevat `GET /api/lounas`. Salasana tarkistetaan vakioaikaisesti,
+- Tekniikka: `POST /api/lounas` → PostgreSQL (`DATABASE_URL`) tai ilman sitä `DATA_DIR/lounas.json`; sivut lukevat `GET /api/lounas`.
+  Tietokannassa jokainen tallennus on oma rivinsä taulussa `lounas` (500 viimeisintä säilyy), joten vahingossa tyhjennetyn listan saa takaisin:
+  `INSERT INTO lounas (data) SELECT data FROM lounas WHERE id = <vanha id>;`. Salasana tarkistetaan vakioaikaisesti,
   10 väärää yritystä / 10 min / IP → 429. Netlify-demossa ja artifaktissa (ei palvelinta) näkyy esimerkkiviikko ja tallennus menee vain selaimen muistiin.
 - Lomakkeet: puuttuva tieto → `?virhe=1`, tekninen lähetysvirhe (SMTP) → `?virhe=2`, jolloin lomake pyytää soittamaan. Syy lokiin.
 
@@ -72,7 +74,8 @@ AI App Hosting: Build `npm install`, Start `npm run start` (package.jsonissa no-
 | Muuttuja | Arvo |
 |---|---|
 | `ADMIN_PASSWORD` | Päivin hallintasivun salasana (sovitaan Päivin kanssa) |
-| `DATA_DIR` | **Pysyvä kansio**, joka säilyy uudelleenjulkaisuissa. Muuten lounaslista ja tiedote nollautuvat jokaisen deployn jälkeen. |
+| `DATABASE_URL` | PostgreSQL: Tietokannat → uusi PostgreSQL → **Yhdistä sivustoon** muuttujaan `DATABASE_URL` (asettuu automaattisesti). Taulu luodaan käynnistyksessä. |
+| `DATA_DIR` | Vain ilman tietokantaa: **pysyvä kansio**, joka säilyy uudelleenjulkaisuissa. Muuten lounaslista ja tiedote nollautuvat jokaisen deployn jälkeen. |
 | `MAIL_TO` | `paivi@joppari.fi` (oletus) |
 | `MAIL_FROM`, `SMTP_HOST`, `SMTP_PORT=465`, `SMTP_USER`, `SMTP_PASS` | cPanel-sähköpostitili, esim. no-reply@joppari.fi; `SMTP_HOST` = palvelimen hostname, ei Cloudflaren takana oleva mail.joppari.fi |
 
@@ -83,6 +86,25 @@ Kanoninen osoite joppari.fi (www ohjautuu juureen). Vanhat osoitteet `/la-carte/
 **Julkaisun jälkeen tarkista:** `/api/lounas` vastaa JSONia, `/hallinta/` kirjautuu, tallennus näkyy etusivulla, lomake lähtee (muuten `?virhe=2`
 ja syy sovelluksen lokissa), ja lista säilyy seuraavan deployn yli.
 
+### Siirto Dokploysta NordicHostiin ilman katkoa
+Dokployssa lista on volyymissa `joppari-data` (`/data/lounas.json`, ei `DATABASE_URL`:ia). Koko sisältö näkyy julkisesta `GET /api/lounas`:sta,
+joten volyymiin ei tarvita pääsyä: kopio tehdään olemassa olevalla `POST /api/lounas`:lla.
+1. NordicHostiin uusi sivusto tästä reposta, ympäristömuuttujat Dokploysta (`ADMIN_PASSWORD`, `MAIL_*`, `SMTP_*`, ei `DATA_DIR`:ia)
+   ja PostgreSQL yhdistettynä muuttujaan `DATABASE_URL`. Testaa `*.nordichost.app`-osoitteessa.
+2. Domains → lisää joppari.fi ja vie TXT-vahvistus Cloudflareen. A/CNAME-tietueeseen ei vielä kosketa.
+3. Kopioi lista, kun Päivi ei muokkaa sitä:
+
+       curl -s https://joppari.fi/api/lounas | curl -s -X POST -H "Content-Type: application/json" -H "X-Admin-Password: $ADMIN_PASSWORD" --data-binary @- https://<uusi-osoite>.nordichost.app/api/lounas
+
+4. Cloudflaressa joppari.fi:n A/CNAME NordicHostin arvoon, MX ennalleen. Tietueet ovat Cloudflaren proxyn takana, joten vaihto näkyy sekunneissa.
+   Jos Cloudflaren SSL-tila on "Full (strict)", varmista ensin NordicHostin sertifikaatti (muuten virhe 526) tai käytä vaihdon ajan "Full"-tilaa.
+5. Vertaa vanhan sovelluksen `/api/lounas`-vastausta (Dokployn sslip.io-osoite): jos sen `updated` on uudempi kuin kopio, aja vaihe 3 uudelleen sieltä.
+6. Pidä Dokploy-sovellus viikon varalla (paluu = DNS takaisin), sitten pysäytä se ja arkistoi `lounas.json`.
+
 ## Testattu (Node 22, 4.10.2026)
 Sivut 200, vanhat URL:t 301, 404, kirjautuminen (väärä 401, oikea 200), tallennus ilman salasanaa 401, tallennus → etusivu, /lounas/ ja tiedote,
 lomakkeet → /kiitos/, puuttuvat tiedot → ?virhe=1, SMTP-virhe → ?virhe=2.
+
+PostgreSQL 17 (Node 24, 15.10.2026): tiedostotila ennallaan ilman `DATABASE_URL`:ia, taulu luodaan käynnistyksessä, siirron curl-putki kopioi
+tuotannon listan, data säilyy uudelleenkäynnistyksen yli, versiohistoria ja palautus, siivous 500 riviin, tietokannan katkos (GET palvelee
+viimeisintä listaa, POST 500 viidessä sekunnissa, prosessi ei kaadu) ja toipuminen ilman uudelleenkäynnistystä.

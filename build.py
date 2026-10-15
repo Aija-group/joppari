@@ -6,7 +6,7 @@
     HOSTING=netlify python3 build.py --preview --artifact -> esikatselu Claude-artifaktina (preview/)
 
 Ilme noudattaa St1:n HelmiSimpukka-maailmaa (vihreä #00463c, kerma #f3f1d1, Nunito Sans) – asemalla toimii HelmiSimpukka Express ja Driver's.
-Lounaslista: Päivi päivittää sen osoitteessa /hallinta/ → server.js tallentaa DATA_DIR/lounas.json → sivut lukevat /api/lounas.
+Lounaslista: Päivi päivittää sen osoitteessa /hallinta/ → server.js tallentaa PostgreSQL:ään (DATABASE_URL) tai DATA_DIR/lounas.json → sivut lukevat /api/lounas.
 Tekstit ja listat: content.py. Tyylit: src/style.css. Toiminnot: src/app.js. Vaatii Pillow-kirjaston.
 """
 import json
