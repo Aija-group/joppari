@@ -2,6 +2,7 @@
  *
  * Tarjoilee valmiiksi rakennetun sivuston site/-kansiosta, käsittelee lomakkeet (POST /lahetys)
  * ja lounaslistan sekä sivuston tiedotteen (GET /api/lounas, POST /api/login, POST /api/lounas, Päivin hallintasivu /hallinta/).
+ * Lounaslista tallennetaan PostgreSQL:ään (DATABASE_URL) tai sen puuttuessa tiedostoon DATA_DIR/lounas.json.
  * Sivusto rakennetaan omalla koneella (python3 build.py) ja site/ commitoidaan repoon – palvelimella ei tarvita Pythonia.
  *
  * Ympäristömuuttujat (cPanel → sovelluksen asetukset):
@@ -12,8 +13,10 @@
  *                   cPanelin sähköpostitilin SMTP-tiedot. Jos puuttuvat, käytetään palvelimen sendmailia.
  *   MAIL_DRYRUN=1   testaus: viestiä ei lähetetä
  *   ADMIN_PASSWORD  hallintasivun (/hallinta/) salasana lounaslistan päivitykseen. Ilman tätä tallennus on pois päältä.
- *   DATA_DIR        mihin lounaslista ja tiedote tallennetaan (oletus ~/joppari-data). Docker-ympäristössä tämän pitää olla
- *                   pysyvä kansio, joka säilyy uudelleenjulkaisuissa, muuten lista nollautuu jokaisen deployn jälkeen.
+ *   DATABASE_URL    PostgreSQL-yhteys (NordicHost: Tietokannat → Yhdistä sivustoon). Kun asetettu, lounaslista ja tiedote
+ *                   tallennetaan tietokantaan (taulu lounas, jokainen tallennus omana rivinään = versiohistoria) eikä DATA_DIR:iin.
+ *   DATA_DIR        jos DATABASE_URL puuttuu: mihin lounaslista ja tiedote tallennetaan (oletus ~/joppari-data). Docker-ympäristössä
+ *                   tämän pitää olla pysyvä kansio, joka säilyy uudelleenjulkaisuissa, muuten lista nollautuu jokaisen deployn jälkeen.
  */
 'use strict';
 const http = require('http');
@@ -169,6 +172,8 @@ function handleForm(req, res) {
 // ---------------------------------------------------------------------------
 const DATA_DIR = process.env.DATA_DIR || path.join(os.homedir(), 'joppari-data');
 const LUNCH_FILE = path.join(DATA_DIR, 'lounas.json');
+const DATABASE_URL = process.env.DATABASE_URL || '';
+const KEEP_VERSIONS = 500; // tietokannassa säilytettävät vanhat tallennukset
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
 const attempts = new Map(); // ip → [aikaleimat]
 
@@ -197,8 +202,46 @@ function passwordOk(given) {
   const b = crypto.createHash('sha256').update(ADMIN_PASSWORD).digest();
   return crypto.timingSafeEqual(a, b);
 }
-function readLunch() {
-  try { return JSON.parse(fs.readFileSync(LUNCH_FILE, 'utf8')); } catch (e) { return { days: {} }; }
+// Tallennus: PostgreSQL, jos DATABASE_URL on asetettu, muuten DATA_DIR/lounas.json.
+let dbReady = null;
+let lastLunch = null; // viimeisin luettu lista: tarjoillaan, jos tietokanta ei hetkellisesti vastaa
+function db() {
+  if (!dbReady) {
+    const { Pool } = require('pg');
+    const pool = new Pool({ connectionString: DATABASE_URL, max: 3, connectionTimeoutMillis: 5000, query_timeout: 5000 });
+    pool.on('error', (e) => console.error('Tietokantayhteys katkesi:', e.message));
+    dbReady = pool.query(`CREATE TABLE IF NOT EXISTS lounas (
+      id serial PRIMARY KEY, data jsonb NOT NULL, saved_at timestamptz NOT NULL DEFAULT now())`)
+      .then(() => pool, (e) => { dbReady = null; pool.end().catch(() => {}); throw e; });
+  }
+  return dbReady;
+}
+async function readLunch() {
+  if (!DATABASE_URL) {
+    try { return JSON.parse(fs.readFileSync(LUNCH_FILE, 'utf8')); } catch (e) { return { days: {} }; }
+  }
+  try {
+    const { rows } = await (await db()).query('SELECT data FROM lounas ORDER BY id DESC LIMIT 1');
+    return (lastLunch = rows.length ? rows[0].data : { days: {} });
+  } catch (e) {
+    if (!lastLunch) throw e;
+    console.error('Lounaslistan luku tietokannasta epäonnistui, käytetään muistissa olevaa:', e.message);
+    return lastLunch;
+  }
+}
+async function writeLunch(data) {
+  if (!DATABASE_URL) {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+    const tmp = LUNCH_FILE + '.tmp';
+    fs.writeFileSync(tmp, JSON.stringify(data, null, 1));
+    return fs.renameSync(tmp, LUNCH_FILE);
+  }
+  const pool = await db();
+  const { rows } = await pool.query('INSERT INTO lounas (data) VALUES ($1) RETURNING id', [JSON.stringify(data)]);
+  lastLunch = data;
+  // Versiohistoria: vanhimmat pois, kun tallennuksia on yli KEEP_VERSIONS
+  await pool.query('DELETE FROM lounas WHERE id <= $1', [rows[0].id - KEEP_VERSIONS])
+    .catch((e) => console.error('Vanhojen lounasversioiden siivous epäonnistui:', e.message));
 }
 function sanitizeLunch(input) {
   const out = { price: String(input.price || '').slice(0, 120), note: String(input.note || '').slice(0, 240),
@@ -214,8 +257,9 @@ function sanitizeLunch(input) {
 }
 function handleApi(req, res, url) {
   if (url.pathname === '/api/lounas' && (req.method === 'GET' || req.method === 'HEAD')) {
-    const d = readLunch();
-    return json(res, 200, { price: d.price || '', note: d.note || '', notice: d.notice || '', days: d.days || {}, updated: d.updated || null });
+    return readLunch().then(
+      (d) => json(res, 200, { price: d.price || '', note: d.note || '', notice: d.notice || '', days: d.days || {}, updated: d.updated || null }),
+      (e) => { console.error('Lounaslistan luku epäonnistui:', e.message); json(res, 503, { error: 'lounaslista ei ole saatavilla' }); });
   }
   if (url.pathname === '/api/login' && req.method === 'POST') {
     if (!ADMIN_PASSWORD) return json(res, 503, { error: 'ADMIN_PASSWORD puuttuu' });
@@ -230,14 +274,9 @@ function handleApi(req, res, url) {
     if (!ADMIN_PASSWORD) return json(res, 503, { error: 'ADMIN_PASSWORD puuttuu' });
     if (limited(req)) return json(res, 429, { error: 'liian monta yritystä' });
     if (!passwordOk(req.headers['x-admin-password'])) { failed(req); return json(res, 401, { error: 'väärä salasana' }); }
-    return readBody(req, 60000, (body) => {
+    return readBody(req, 60000, async (body) => {
       let data; try { data = sanitizeLunch(JSON.parse(body)); } catch (e) { return json(res, 400, { error: 'virheellinen data' }); }
-      try {
-        fs.mkdirSync(DATA_DIR, { recursive: true });
-        const tmp = LUNCH_FILE + '.tmp';
-        fs.writeFileSync(tmp, JSON.stringify(data, null, 1));
-        fs.renameSync(tmp, LUNCH_FILE);
-      } catch (e) { console.error('Lounaslistan tallennus epäonnistui:', e.message); return json(res, 500, { error: 'tallennus epäonnistui' }); }
+      try { await writeLunch(data); } catch (e) { console.error('Lounaslistan tallennus epäonnistui:', e.message); return json(res, 500, { error: 'tallennus epäonnistui' }); }
       json(res, 200, { ok: true, updated: data.updated });
     });
   }
@@ -262,6 +301,8 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`St1 Joppari käynnissä portissa ${PORT}, lounaslista: ${LUNCH_FILE}`);
+  console.log(`St1 Joppari käynnissä portissa ${PORT}, lounaslista: ${DATABASE_URL ? 'PostgreSQL (DATABASE_URL)' : LUNCH_FILE}`);
   if (!ADMIN_PASSWORD) console.warn('ADMIN_PASSWORD puuttuu: lounaslistan tallennus /hallinta/ on pois päältä.');
+  // Yhteysvirhe näkyy lokissa heti käynnistyksessä eikä vasta ensimmäisellä sivulatauksella
+  if (DATABASE_URL) readLunch().catch((e) => console.error('Tietokantaan ei saatu yhteyttä:', e.message));
 });

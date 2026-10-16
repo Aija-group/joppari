@@ -85,28 +85,37 @@
     if (data.price) $('[data-lunch-price]', card).textContent = data.price;
     var demo = $('[data-lunch-demo]', card); if (demo) demo.hidden = !data.sample;
   }
-  function renderWeek(box, data) {
-    var mon = monday(NOW.iso), days = data.days || {}, html = '', tabs = '', any = false;
+  /* Lounassivu: kuluva ja ensi viikko allekkain, kummallakin omat päiväpainikkeet */
+  function weekBlock(mon, days, title) {
+    var html = '', tabs = '', any = false;
     for (var i = 0; i < 7; i++) {
       var iso = isoAdd(mon, i), list = days[iso] || [], today = iso === NOW.iso;
       if (list.length) any = true;
       tabs += '<button type="button" role="tab" data-day="' + iso + '"' + (today ? ' class="on"' : '') + '>' + DAYN[dow(iso)].slice(0, 2) + ' ' + fiDate(iso) + (today ? '<span class="today">tänään</span>' : '') + '</button>';
-      html += '<div class="wday' + (today ? ' is-today show' : '') + '" data-wday="' + iso + '"><h3>' + DAYN[dow(iso)] + '<small>' + fiDate(iso) + '</small></h3>' +
+      html += '<div class="wday' + (today ? ' is-today' : '') + '" data-wday="' + iso + '"><h3>' + DAYN[dow(iso)] + '<small>' + fiDate(iso) + '</small></h3>' +
         (list.length ? '<ul class="lc-list">' + list.map(function (l) { return '<li>' + dishHTML(l) + '</li>'; }).join('') + '</ul>'
           : '<p class="lc-empty">Lista päivitetään. Kysy päivän ruoat puhelimitse.</p>') + '</div>';
     }
-    $('[data-week-label]', box).textContent = 'Viikko ' + weekNo(mon) + ' · ' + fiDate(mon) + '–' + fiDate(isoAdd(mon, 6));
-    if (!any) return;
-    var wrap = $('[data-week-days]', box), tabBox = $('[data-week-tabs]', box);
-    wrap.innerHTML = html;
-    tabBox.innerHTML = tabs;
+    var head = '<div class="wk-title"><b>' + title + '</b><span>Viikko ' + weekNo(mon) + ' · ' + fiDate(mon) + '–' + fiDate(isoAdd(mon, 6)) + '</span></div>';
+    if (!any) return { any: false, html: '<section class="wk wk-empty">' + head + '<p class="lc-empty">Viikon lounaslista julkaistaan pian.</p></section>' };
+    return { any: true, html: '<section class="wk">' + head + '<div class="week-tabs" role="tablist" aria-label="Viikonpäivät">' + tabs + '</div><div class="wk-days">' + html + '</div></section>' };
+  }
+  function renderWeek(box, data) {
+    var mon = monday(NOW.iso), next = isoAdd(mon, 7), days = data.days || {};
+    var w1 = weekBlock(mon, days, 'Tämä viikko'), w2 = weekBlock(next, days, 'Ensi viikko');
+    $('[data-week-label]', box).textContent = 'Viikot ' + weekNo(mon) + '–' + weekNo(next);
+    if (!w1.any && !w2.any) return;
+    var wrap = $('[data-week-days]', box);
+    wrap.innerHTML = w1.html + w2.html;
     if (data.price) $('[data-lunch-price]', box).textContent = data.price;
     if (data.note) { var n = $('[data-lunch-note]', box); n.textContent = data.note; n.hidden = false; }
     var demo = $('[data-lunch-demo]', box); if (demo) demo.hidden = !data.sample;
-    $$('button', tabBox).forEach(function (b) {
+    /* Puhelimella painikerivi vierii sivuttain: tuodaan tämä päivä näkyviin */
+    $$('.week-tabs', wrap).forEach(function (t) { var on = $('.on', t); if (on && t.scrollWidth > t.clientWidth) t.scrollLeft = on.offsetLeft - t.offsetLeft - 18; });
+    $$('.week-tabs button', wrap).forEach(function (b) {
       b.addEventListener('click', function () {
-        /* Koko viikko pysyy näkyvissä: painike siirtää korostuksen valittuun päivään ja vierittää siihen */
-        $$('button', tabBox).forEach(function (x) { x.classList.toggle('on', x === b); });
+        /* Kaikki päivät pysyvät näkyvissä: painike siirtää korostuksen valittuun päivään ja vierittää siihen */
+        $$('.week-tabs button', wrap).forEach(function (x) { x.classList.toggle('on', x === b); });
         var target;
         $$('.wday', wrap).forEach(function (w) { var on = w.dataset.wday === b.dataset.day; w.classList.toggle('is-today', on); if (on) target = w; });
         if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });

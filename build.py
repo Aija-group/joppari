@@ -6,7 +6,7 @@
     HOSTING=netlify python3 build.py --preview --artifact -> esikatselu Claude-artifaktina (preview/)
 
 Ilme noudattaa St1:n HelmiSimpukka-maailmaa (vihreä #00463c, kerma #f3f1d1, Nunito Sans) – asemalla toimii HelmiSimpukka Express ja Driver's.
-Lounaslista: Päivi päivittää sen osoitteessa /hallinta/ → server.js tallentaa DATA_DIR/lounas.json → sivut lukevat /api/lounas.
+Lounaslista: Päivi päivittää sen osoitteessa /hallinta/ → server.js tallentaa PostgreSQL:ään (DATABASE_URL) tai DATA_DIR/lounas.json → sivut lukevat /api/lounas.
 Tekstit ja listat: content.py. Tyylit: src/style.css. Toiminnot: src/app.js. Vaatii Pillow-kirjaston.
 """
 import json
@@ -627,11 +627,10 @@ def build_lounas():
 
 <section class="sec" id="viikko"><div class="wrap week-grid">
   <div class="week rv" data-lunch="week">
-    <div class="week-head"><div><span class="kicker" data-week-label>Viikon lounaslista</span><h2>Lounaslista</h2></div>
+    <div class="week-head"><div><span class="kicker" data-week-label>Tämä ja ensi viikko</span><h2>Lounaslista</h2></div>
       <p class="lc-price big" data-lunch-price></p></div>
-    <div class="week-tabs" data-week-tabs role="tablist" aria-label="Viikonpäivät"></div>
     <div class="week-days" data-week-days>
-      <p class="lc-empty">Viikon lounaslista päivitetään tähän. Buffet on tarjolla joka päivä {BUFFET_HOURS}. Kysy päivän ruoat: <a href="{TEL}">{COMPANY["phone"]}</a></p>
+      <p class="lc-empty">Lounaslista päivitetään tähän. Buffet on tarjolla joka päivä {BUFFET_HOURS}. Kysy päivän ruoat: <a href="{TEL}">{COMPANY["phone"]}</a></p>
     </div>
     <p class="lc-note" data-lunch-note hidden></p>
     {DEMO_NOTE}
