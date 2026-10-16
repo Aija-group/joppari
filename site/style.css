@@ -196,9 +196,10 @@ code { font-size: .9em; background: var(--cream-2); padding: 2px 6px; border-rad
 .price-row > div { padding: 14px 20px; border-radius: var(--r-sm); background: rgba(243, 241, 209, .12); border: 1px solid rgba(243, 241, 209, .25); }
 .price-row small { display: block; font-size: .74rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: rgba(255, 255, 255, .7); margin-bottom: 4px; }
 .price-row b { font-weight: 900; font-size: 1.7rem; color: var(--cream); white-space: nowrap; }
-.price-row.dark > div { background: #fff; border-color: var(--cream-line); flex: 1; padding: 12px 14px; }
+.price-row.dark { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.price-row.dark > div { background: #fff; border-color: var(--cream-line); padding: 10px 12px; min-width: 0; }
 .price-row.dark small { color: var(--muted); }
-.price-row.dark b { color: var(--green); font-size: 1.3rem; }
+.price-row.dark b { color: var(--green); font-size: clamp(1.05rem, 1.6vw, 1.3rem); }
 
 /* Asema */
 .station { display: grid; grid-template-columns: 1fr 1.05fr; gap: 64px; align-items: center; }
@@ -266,15 +267,21 @@ code { font-size: .9em; background: var(--cream-2); padding: 2px 6px; border-rad
 .week { background: var(--cream); border-radius: var(--r); padding: 38px; }
 .week-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 10px 20px; margin-bottom: 18px; }
 .week-head h2 { margin: 0; }
+.wk + .wk { margin-top: 36px; padding-top: 30px; border-top: 2px solid var(--cream-line); }
+.wk-title { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin-bottom: 14px; }
+.wk-title b { font: 900 1.45rem/1.2 var(--font); color: var(--ink); }
+.wk-title span { font-weight: 700; color: var(--green-2); }
+.wk-empty .lc-empty { margin: 0; }
 .week-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px; }
-.week-tabs button { border: 2px solid var(--green); background: transparent; color: var(--green); border-radius: var(--pill); padding: 8px 14px; font-weight: 800; font-size: .92rem; }
+.week-tabs button { border: 2px solid var(--green); background: transparent; color: var(--green); border-radius: var(--pill); padding: 6px 11px; font-weight: 800; font-size: .86rem; white-space: nowrap; }
 .week-tabs button.on { background: var(--green); color: #fff; }
-.week-tabs button .today { font-size: .7rem; text-transform: uppercase; margin-left: 6px; opacity: .8; }
+.week-tabs button .today { font-size: .64rem; text-transform: uppercase; margin-left: 5px; opacity: .85; }
 .wday h3 { font-size: 1.1rem; margin: 22px 0 6px; color: var(--green); }
 .wday h3 small { font-weight: 700; color: var(--muted); font-size: .85rem; margin-left: 6px; }
 .wday:first-child h3 { margin-top: 0; }
 .wday.is-today { background: #fff; border-radius: var(--r-sm); padding: 18px 20px; margin: 10px -20px; transition: background .25s; }
-.week-side { display: grid; gap: 16px; }
+.week-side { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+.week-side > * { min-width: 0; }
 .buffet-card { position: relative; padding: 0 !important; overflow: hidden; }
 .buffet-card img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; }
 .buffet-card > div { padding: 22px 24px 24px; }
@@ -540,6 +547,9 @@ code { font-size: .9em; background: var(--cream-2); padding: 2px 6px; border-rad
   .groups { padding: 64px 22px; }
   .en-card { padding: 24px 22px; }
   .week { padding: 24px 18px; }
+  .week-tabs { flex-wrap: nowrap; overflow-x: auto; margin: 0 -18px 16px; padding: 0 18px 4px; scrollbar-width: none; }
+  .week-tabs::-webkit-scrollbar { display: none; }
+  .week-tabs button { flex: none; }
   .wday.is-today { margin: 10px -8px; padding: 14px; }
   .visit-cards { grid-template-columns: 1fr; }
   .map { min-height: 300px; }

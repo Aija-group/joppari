@@ -39,7 +39,8 @@ Esikatselu: https://claude.ai/artifact/6Ua4VCmkdXvDkmfcaSWNsi
     viikkoja voi selata eteen ja taakse, "Kopioi edellinen viikko" täyttää tyhjät päivät
   - **buffetin hinnan** ja **lisätiedon** (näkyvät listan alla)
   - **tiedotteen koko sivuston yläreunaan** (esim. poikkeavat aukioloajat), tyhjä = ei tiedotetta
-- "Tallenna ja julkaise" päivittää heti etusivun "Päivän lounas" -kortin, /lounas/-sivun viikkolistan ja tiedotteen.
+- "Tallenna ja julkaise" päivittää heti etusivun "Päivän lounas" -kortin, /lounas/-sivun listan ja tiedotteen.
+- /lounas/ näyttää aina **kuluvan ja ensi viikon** (16.10.2026 asiakkaan toive). Jos ensi viikkoa ei ole kirjattu, näkyy "Viikon lounaslista julkaistaan pian". Päivi kirjaa ensi viikon hallinnassa nuolella seuraavalle viikolle.
 - Tekniikka: `POST /api/lounas` → PostgreSQL (`DATABASE_URL`) tai ilman sitä `DATA_DIR/lounas.json`; sivut lukevat `GET /api/lounas`.
   Tietokannassa jokainen tallennus on oma rivinsä taulussa `lounas` (500 viimeisintä säilyy), joten vahingossa tyhjennetyn listan saa takaisin:
   `INSERT INTO lounas (data) SELECT data FROM lounas WHERE id = <vanha id>;`. Salasana tarkistetaan vakioaikaisesti,
