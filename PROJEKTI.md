@@ -24,3 +24,5 @@ Avoin riski: DATA_DIR pysyvyys AI App Hostingin Docker-kontissa → Valtterin va
 
 **How to apply:** iteroi scratchpadissa, launch.json "joppari-site" ajaa oikeaa Node-palvelinta (testisalasana, DATA_DIR scratchpadissa).
 Asiakkaan hinnat/tiedot aina asiakkaalta, ei vanhalta sivulta. Liittyy feedback-ei-lupauksia.
+
+- **27.10.2026 Search Console:** URL-etuliiteominaisuus https://joppari.fi/ Sulon Google-tilillä, vahvistettu HTML-tagilla (`content.py` COMPANY["google_verification"], build.py lisää metan robots-metan perään), sitemap.xml lähetetty (6 sivua, Onnistui), etusivun indeksointipyyntö lähetetty. Sivu on tuotannossa joppari.fi:ssä (NordicHost 1239/1321, julkinen repo-osoite). **Avoinna julkaisun jälkeisistä toimista:** Lighthouse ennen/jälkeen, laite- ja selaintesti, nopeus (Google Fonts ladataan googleapis.comista → omalle palvelimelle), metat (etusivun kuvaus 178 ja lounas 162 merkkiä), geneerinen sähköposti, Bing Webmaster Tools.
