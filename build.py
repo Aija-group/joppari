@@ -252,6 +252,8 @@ def page(path, title, description, body, current="", schema=None, noindex=False,
     if not noindex and path != "/404.html":
         SITEMAP.append((path, TODAY))
     robots = '<meta name="robots" content="noindex">' if (noindex or DEMO) else '<meta name="robots" content="max-image-preview:large">'
+    if COMPANY.get("google_verification") and not DEMO:
+        robots += f'\n<meta name="google-site-verification" content="{esc(COMPANY["google_verification"])}">'
     ld = "".join(f'<script type="application/ld+json">{json.dumps(s, ensure_ascii=False)}</script>'
                  for s in [org_schema()] + (schema or []))
     pre = ""

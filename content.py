@@ -11,6 +11,7 @@ COMPANY = {
     "station": "St1 Pello",
     "short": "Joppari",
     "domain": "joppari.fi",
+    "google_verification": "Qt8AI16TCq-haVqedUgyS6XXK-V6cU3xFDD8mqLzRJE",  # Search Console HTML-tagin content-arvo; tyhjä = ei tagia
     "street": "Pellontie 31",
     "zip": "95700",
     "city": "Pello",
